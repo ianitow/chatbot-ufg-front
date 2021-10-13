@@ -12,6 +12,7 @@
       use-input
       @filter="filterFn"
       input-debounce="200"
+      behavior="menu"
       @update:model-value="this.$emit('update:model-value', courseSelected)"
     >
       <template v-slot:no-option>

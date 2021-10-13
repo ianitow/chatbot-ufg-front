@@ -19,6 +19,7 @@
       placeholder="Digite algo..."
       minlength="4"
       :disabled="disabled"
+      @focus="onFocusable"
     />
 
     <div
@@ -40,10 +41,11 @@
 </template>
 <script>
 import { ref, watch, nextTick, onMounted } from "vue";
-import { captureVoice, stopVoice, options } from "../use/useVoice";
+import { captureVoice, stopVoice, options, setText } from "../use/useVoice";
+import { useQuasar } from "quasar";
 export default {
   name: "SendMessage",
-  emits: ["onSendMessage"],
+  emits: ["onSendMessage", "onInputFocus"],
   props: {
     disabled: Boolean,
   },
@@ -51,13 +53,14 @@ export default {
   setup(props, { emit }) {
     const message = ref("");
     const inputElement = ref(null);
+    const $q = useQuasar();
     onMounted(() => {
       console.log("props", props);
     });
     watch(
       () => props.disabled,
       (newValue) => {
-        if (!newValue) {
+        if (!newValue && !$q.platform.is.mobile) {
           nextTick(() => {
             inputElement.value.focus();
           });
@@ -76,6 +79,9 @@ export default {
         onSendMessage();
       });
     }
+    function onFocusable() {
+      emit("onInputFocus", 500);
+    }
     return {
       message,
       onSendMessage,
@@ -83,6 +89,7 @@ export default {
       onVoiceCaptured,
       stopVoice,
       options,
+      onFocusable,
     };
   },
 };
@@ -100,7 +107,7 @@ export default {
 .message-send {
   background-color: #f2f2f2;
   border-radius: 30px;
-  height: 5vh;
+  height: 2.5rem;
 }
 .message-icon:hover {
   cursor: pointer;

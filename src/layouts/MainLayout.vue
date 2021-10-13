@@ -15,6 +15,11 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+@media (max-width: $breakpoint-sm-max) {
+  .q-layout {
+    background-image: none !important;
+  }
+}
 .q-layout {
   background-image: url("~assets/background-header.svg");
   background-size: contain;

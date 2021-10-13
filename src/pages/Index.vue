@@ -41,4 +41,9 @@ h2 {
   font-size: 2rem;
   font-weight: 200;
 }
+@media (max-width: $breakpoint-sm-max) {
+  h2 {
+    font-size: 1.7rem;
+  }
+}
 </style>

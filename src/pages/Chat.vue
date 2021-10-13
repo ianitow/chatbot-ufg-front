@@ -18,7 +18,7 @@
       </div>
     </header>
     <div
-      class="container-chat flex container-master fit"
+      class="container-chat flex container-master"
       style="overflow-y: scroll"
       ref="containerRef"
     >
@@ -60,7 +60,11 @@
         </div>
       </div>
     </div>
-    <send-message @onSendMessage="onMessage" :disabled="isInputChatDisabled" />
+    <send-message
+      @onSendMessage="onMessage"
+      @onInputFocus="updateScroll"
+      :disabled="isInputChatDisabled"
+    />
   </q-page>
 </template>
 
@@ -88,10 +92,10 @@ export default {
     const isInputChatDisabled = ref(false);
     moment.locale("pt-BR");
     const date = ref(moment().format("LLL"));
-    function updateScroll() {
+    function updateScroll(ms = 5) {
       setTimeout(() => {
         containerRef.value.scrollTop = containerRef.value.scrollHeight;
-      }, 5);
+      }, ms);
     }
     function addMessage(message = "", isSender = true, isTyping = false) {
       messages.value.push({ message, isSender, isTyping });
@@ -101,7 +105,7 @@ export default {
       messages.value[messages.value.length - 1].isTyping = false;
       messages.value[messages.value.length - 1].message = message;
       setText(message);
-      // playText();
+      playText();
     }
     function onMessage(text, isOnlyBot = false) {
       if (!isOnlyBot) {
@@ -147,6 +151,7 @@ export default {
       date,
       prompt,
       onReportMessage,
+      updateScroll,
     };
   },
 };
@@ -159,8 +164,17 @@ export default {
   padding: 10px 10px 0px 10px;
   border: 1px solid #f0f0f0;
   border-top: none;
-  max-height: 64.5vh;
   scroll-behavior: smooth;
+}
+@media (min-width: $breakpoint-md-min) {
+  .container-chat {
+    max-height: 66.3vh;
+  }
+}
+@media (max-width: $breakpoint-sm-max) {
+  .container-chat {
+    max-height: 70.3vh;
+  }
 }
 .container-messages {
   overflow-y: auto;

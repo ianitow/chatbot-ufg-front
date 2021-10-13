@@ -1,6 +1,7 @@
 <template>
   <div id="container" class="row">
-    <aside class="col-md-4 col-lg-3 gt-sm"><header-container /></aside>
+    <header-mobile v-if="isScreenMobile" />
+    <header-desktop v-if="!isScreenMobile" />
 
     <q-page-container
       class="router-view col-xs-12 col-md-8 col-lg-9 col-sm-12"
@@ -18,11 +19,22 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref } from "vue";
-import HeaderContainer from "./HeaderContainer.vue";
+import { defineComponent, ref, computed } from "vue";
+import HeaderDesktop from "./HeaderDesktop.vue";
+import HeaderMobile from "./HeaderMobile.vue";
+import { useQuasar } from "quasar";
+
 export default defineComponent({
   name: "Container",
-  components: { HeaderContainer },
+  components: { HeaderDesktop, HeaderMobile },
+  setup() {
+    const $q = useQuasar();
+    const isScreenMobile = computed(() => {
+      return $q.screen.lt.md ? true : false;
+    });
+
+    return { isScreenMobile };
+  },
 });
 </script>
 
