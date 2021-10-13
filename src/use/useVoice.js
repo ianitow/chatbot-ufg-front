@@ -1,9 +1,9 @@
 import { reactive, ref } from "vue";
+
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
-  
-const recognition = SpeechRecognition ? new SpeechRecognition() : false;
 
+const recognition = SpeechRecognition ? new SpeechRecognition() : false;
 
 const options = reactive({
   volume: 1,
@@ -12,8 +12,8 @@ const options = reactive({
   lang: "pt-BR",
   text: "",
   isCapturingVoice: false,
+  audio: null,
 });
-const voice = ref(null);
 function captureVoice() {
   return new Promise((resolve, reject) => {
     options.isCapturingVoice = true;
@@ -51,19 +51,16 @@ function stopVoice() {
   recognition.stop();
   options.isCapturingVoice = false;
 }
+
 function setText(text = "") {
   options.text = text;
+  options.audio = new Audio(
+    `https://mrfalante0cyber.ddns.net/api/${options.text}/1/1/0.5/160/ogg`
+  );
+  options.audio.preload = "auto";
 }
-
-function playText() {
-  const audio =
-    voice.value == null ? new SpeechSynthesisUtterance() : voice.value;
-  audio.text = options.text;
-  audio.volume = options.volume;
-  audio.pitch = options.pitch;
-  audio.lang = options.lang;
-  audio.text = options.text;
-  window.speechSynthesis.speak(audio);
+async function playText() {
+  options.audio.play();
 }
 
 export { setText, playText, captureVoice, stopVoice, options };
