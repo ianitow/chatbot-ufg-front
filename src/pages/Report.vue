@@ -1,47 +1,36 @@
 <template>
   <q-page class="flex container-master justify-center items-center">
-    <div
-      class="
-        justify-center
-        text-center
-        items-center
-        flex
-        container-master
-        q-pa-none
-      "
-    >
-      <q-img src="~assets/bug_fixing.svg" style="width: 20vw" />
-      <h2 class="q-mb-none">Conte-nos o que deu errado?</h2>
-      <small class="block full-width q-mb-md"
-        >Descreva um pouco do que aconteceu.</small
+    <div class="justify-center text-center items-center">
+      <q-img src="~assets/bug_fixing.svg" style="width: 100%" />
+      <h2 class="q-mb-none">Algum problema?</h2>
+
+      <small class="block full-width"
+        >Descreva um pouco sobre os problemas que enfrentou.</small
       >
       <q-input
         v-model="ratingModel"
-        class="full-width q-px-none q-mx-none"
-        size="3.5em"
+        class="full-width q-mb-md"
+        size="1.5em"
         color="primary"
         icon="star_border"
         icon-selected="star"
       />
-    </div>
-    <div class="row full-width justify-end">
-      <q-btn
-        style="width: 160px; height: 45px"
-        class="text-center q-pr-xs text-weight-bold"
-        color="primary"
-        icon-right="arrow_forward_ios"
-        label="Enviar"
-        type="submit"
-        :disabled="isButtonDisabled"
-        @click="onSubmit"
-      />
+      <div class="row fit justify-center" style="flex: 1">
+        <q-btn
+          style="width: 160px; height: 45px"
+          class="text-center q-pr-xs text-weight-bold"
+          color="primary"
+          icon-right="arrow_forward_ios"
+          label="Enviar"
+          type="submit"
+          :disabled="isButtonDisabled"
+          @click="onSubmit"
+        />
+      </div>
     </div>
   </q-page>
 </template>
-
 <script>
-import InputComponent from "src/components/InputComponent.vue";
-import SelectComponent from "src/components/SelectComponent.vue";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { setName, setCourse } from "../use/useApi";
@@ -83,7 +72,7 @@ export default {
 }
 
 h2 {
-  font-size: 2rem;
+  font-size: 1.7rem;
   font-weight: 200;
 }
 span {

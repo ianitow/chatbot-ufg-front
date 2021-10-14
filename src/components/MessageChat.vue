@@ -107,7 +107,7 @@
         v-if="!sender"
         class="icon-report row items-center justify-center q-px-xs"
       >
-        <div class="row items-center justify-start">
+        <div class="row items-center justify-start desktop-only">
           <span class="block full-width cursor-pointer q-mb-md">👍</span>
           <span @click="emitReport" class="block full-width cursor-pointer"
             >👎</span

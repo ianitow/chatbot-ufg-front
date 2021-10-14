@@ -168,7 +168,7 @@ export default {
 }
 @media (min-width: $breakpoint-md-min) {
   .container-chat {
-    max-height: 66.3vh;
+    max-height: 62.3vh;
   }
 }
 @media (max-width: $breakpoint-sm-max) {
