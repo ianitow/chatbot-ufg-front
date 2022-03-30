@@ -4,8 +4,7 @@
       <q-img src="~assets/bug_fixing.svg" style="width: 100%" />
       <h2 class="q-mb-none">Algum problema?</h2>
 
-      <small class="block full-width"
-        >Descreva um pouco sobre os problemas que enfrentou.</small
+      <small class="block full-width">Descreva um pouco sobre os problemas que enfrentou.</small
       >
       <q-input
         v-model="ratingModel"
@@ -33,20 +32,24 @@
 <script>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { setName, setCourse } from "../use/useApi";
+import { sendReport } from "../use/useApi";
+
+//Min caracteres 10
+//Mensagem de erro se náo tiver mensagem
+//Bloquear botão de enviar após enviar alguma mensagem (SessionStorage)
+//http://locahost:3000/report
+/**
+ * {
+ *  message:''
+ * }
+ */
 export default {
   components: {},
   setup() {
     const router = useRouter();
     const userInput = ref(null);
     const selectedInput = ref(null);
-    function onInputChange(nameStudent) {
-      userInput.value = nameStudent;
-    }
-    function onSelectedChange(nameCourse) {
-      selectedInput.value = nameCourse;
-    }
-
+   
     const isButtonDisabled = computed(() =>
       !userInput.value ||
       userInput.value.length < 4 ||
@@ -56,12 +59,7 @@ export default {
         ? true
         : false
     );
-    function onSubmit() {
-      console.log("Clicado");
-      setName(userInput.value);
-      setCourse(selectedInput.value);
-      router.push({ name: "Chat" });
-    }
+    function onSubmit() {}
     return { onInputChange, onSelectedChange, isButtonDisabled, onSubmit };
   },
 };

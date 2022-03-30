@@ -1,9 +1,27 @@
 import { reactive } from "vue";
 import { api } from "../boot/axios";
+import axios from "axios";
+
 const state = reactive({
   name: "",
   course: "",
 });
+
+async function addNewRating(fullname, rating) {
+  return new Promise((resolve, reject) => {
+    axios
+      .post("http://localhost:3000/ratings", {
+        fullname,
+        rating,
+      })
+      .then(function (response) {
+        resolve(response.data);
+      })
+      .catch(function (error) {
+        reject(error);
+      });
+  });
+}
 
 function setName(name = "") {
   state.name = name;
@@ -47,4 +65,8 @@ function sendQuestion(question, id = 1) {
   });
 }
 
-export { state, setCourse, setName, sendQuestion };
+function sendReport(message) {
+  new Promise((resolve, reject) => {});
+}
+
+export { state, setCourse, setName, sendQuestion, sendReport, addNewRating };
