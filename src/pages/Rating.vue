@@ -3,14 +3,13 @@
     <div class="justify-center text-center items-center">
       <q-img src="~assets/review.svg" style="width: 100%" />
       <h2 class="q-mb-none">Gostou da Teguinha?</h2>
-      <small class="block full-width q-mb-md"
-        >Avalie com uma nota para sabermos sua experiencia.</small
-      >
+      <small class="block full-width q-mb-md">Avalie com uma nota para sabermos sua experiencia.</small>
       <q-rating
         v-model="ratingModel"
         size="3.5em"
         color="primary"
         icon="star_border"
+        :disable="!isRatingEnabled"
         icon-selected="star"
         @update:model-value="
           () => {
@@ -39,36 +38,52 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { state, addNewRating } from "../use/useApi";
-import { useQuasar } from "quasar";
+import { ref, onBeforeMount } from 'vue';
+import { useRouter } from 'vue-router';
+import { state, addNewRating } from '../use/useApi';
+import { useQuasar } from 'quasar';
 export default {
   components: {},
   setup() {
+    const isRatingEnabled = ref(true);
     const $q = useQuasar();
     const router = useRouter();
     const ratingModel = ref(0);
+    const isAlreadyVotedKey = 'ratingObject';
+
+    onBeforeMount(() => {
+      const isKeyExists = $q.sessionStorage.has(isAlreadyVotedKey);
+      if (isKeyExists) {
+        const { ratingValue } = $q.sessionStorage.getItem(isAlreadyVotedKey);
+        isRatingEnabled.value = false;
+        ratingModel.value = ratingValue;
+      }
+    });
 
     function sendRating() {
       addNewRating(state.name, ratingModel.value)
         .then(() => {
+          $q.sessionStorage.set(isAlreadyVotedKey, {
+            ratingValue: ratingModel.value,
+          });
+          isRatingEnabled.value = false;
+
           $q.notify({
-            message: "Sua avaliação foi computada. Obrigado!",
-            color: "positive",
+            message: 'Sua avaliação foi computada. Obrigado!',
+            color: 'positive',
           });
         })
         .catch(() => {
           if (!state.name.length) {
             $q.notify({
-              message:
-                "Você não informou o nome, por favor, informe na página inicial!",
-              color: "negative",
+              message: 'Você não informou o nome, por favor, informe na página inicial!',
+              color: 'negative',
             });
           }
         });
     }
-    return { sendRating, ratingModel };
+
+    return { sendRating, ratingModel, isRatingEnabled };
   },
 };
 </script>

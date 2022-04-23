@@ -5,8 +5,7 @@
 
       <h2 class="q-mb-none">Seja muito bem vindo(a)</h2>
       <small class="block full-width q-mb-md"
-        >Conheça a Teguinha, a assistente virtual que irá te ajudar com suas
-        dúvidas.</small
+        >Conheça a Teguinha, a assistente virtual que irá te ajudar com suas dúvidas.</small
       >
       <q-btn
         style="width: 160px; height: 45px"
@@ -22,13 +21,13 @@
 </template>
 
 <script>
-import { useRouter } from "vue-router";
+import { useRouter } from 'vue-router';
 export default {
   setup() {
     const router = useRouter();
     function onClick() {
       router.push({
-        name: "TermPrivacy",
+        name: 'TermPrivacy',
       });
     }
     return { onClick };

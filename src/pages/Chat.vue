@@ -1,27 +1,15 @@
 <template>
   <q-page class="flex container-master">
-    <header
-      class="q-px-sm q-py-xs row self-start items-center non-selectable"
-      st
-    >
-      <q-avatar
-        class="avatar"
-        :class="{ online: isOnline, busy: !isOnline }"
-        size="80px"
-        text-color="white"
-      >
+    <header class="q-px-sm q-py-xs row self-start items-center non-selectable" st>
+      <q-avatar class="avatar" :class="{ online: isOnline, busy: !isOnline }" size="80px" text-color="white">
         <img class="q-pa-sm" src="~assets/teguinha.svg"
       /></q-avatar>
       <div class="column q-ml-sm">
         <span class="name">Teguinha</span>
-        <span class="status">{{ isOnline ? "Online" : "Ocupada" }}</span>
+        <span class="status">{{ isOnline ? 'Online' : 'Ocupada' }}</span>
       </div>
     </header>
-    <div
-      class="container-chat flex container-master"
-      style="overflow-y: scroll"
-      ref="containerRef"
-    >
+    <div class="container-chat flex container-master" style="overflow-y: scroll" ref="containerRef">
       <q-dialog v-model="prompt" persistent>
         <q-card style="min-width: 350px">
           <q-card-section>
@@ -30,12 +18,7 @@
           </q-card-section>
 
           <q-card-section class="q-pt-none">
-            <q-input
-              dense
-              v-model="address"
-              autofocus
-              @keyup.enter="prompt = false"
-            />
+            <q-input dense v-model="address" autofocus @keyup.enter="prompt = false" />
           </q-card-section>
 
           <q-card-actions align="right" class="text-primary">
@@ -45,9 +28,7 @@
         </q-card>
       </q-dialog>
       <div class="row">
-        <span class="full-width text-center block date q-mb-md">{{
-          date
-        }}</span>
+        <span class="full-width text-center block date q-mb-md">{{ date }}</span>
         <div class="row container-messages q-pb-md wrap">
           <message-chat
             v-for="(msg, index) in messages"
@@ -60,25 +41,21 @@
         </div>
       </div>
     </div>
-    <send-message
-      @onSendMessage="onMessage"
-      @onInputFocus="updateScroll"
-      :disabled="isInputChatDisabled"
-    />
+    <send-message @onSendMessage="onMessage" @onInputFocus="__updateScroll" :disabled="isInputChatDisabled" />
   </q-page>
 </template>
 
 <script>
-import { useRouter } from "vue-router";
-import { ref, onMounted } from "vue";
-import MessageChat from "../components/MessageChat";
-import SendMessage from "../components/SendMessage";
+import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import MessageChat from '../components/MessageChat';
+import SendMessage from '../components/SendMessage';
 
-import moment from "moment";
-import { sendQuestion, state } from "../use/useApi";
-import { setText, playText } from "../use/useVoice";
+import moment from 'moment';
+import { sendQuestion, state } from '../use/useApi';
+import { setText, playText } from '../use/useVoice';
 export default {
-  name: "Chat",
+  name: 'Chat',
   components: { SendMessage, MessageChat },
 
   setup() {
@@ -90,16 +67,16 @@ export default {
     let id = 1;
     const messages = ref([]);
     const isInputChatDisabled = ref(false);
-    moment.locale("pt-BR");
-    const date = ref(moment().format("LLL"));
-    function updateScroll(ms = 5) {
+    moment.locale('pt-BR');
+    const date = ref(moment().format('LLL'));
+    function __updateScroll(ms = 5) {
       setTimeout(() => {
         containerRef.value.scrollTop = containerRef.value.scrollHeight;
       }, ms);
     }
-    function addMessage(message = "", isSender = true, isTyping = false) {
+    function addMessage(message = '', isSender = true, isTyping = false) {
       messages.value.push({ message, isSender, isTyping });
-      updateScroll();
+      __updateScroll();
     }
     function updateLastMessage(message) {
       messages.value[messages.value.length - 1].isTyping = false;
@@ -133,11 +110,9 @@ export default {
     }
     onMounted(() => {
       if (!state.course || !state.name) {
-        router.push({ name: "Home" });
+        router.push({ name: 'Home' });
       }
-      onMessage(
-        `Olá, me chamo ${state.name} e estou cursando ${state.course.value}.`
-      );
+      onMessage(`Olá, me chamo ${state.name} e estou cursando ${state.course.value}.`);
     });
     function onReportMessage() {
       prompt.value = !prompt.value;
@@ -210,7 +185,7 @@ header {
   display: inline-block;
 
   &:before {
-    content: "";
+    content: '';
     position: absolute;
     bottom: 0;
     right: 10px;
