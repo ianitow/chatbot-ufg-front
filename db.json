@@ -1,20 +1,14 @@
 {
-  "aswners": [
+  "answers": [
     {
-      "id": 1,
-      "message": "Olá, me chamo Teguinha e estou aqui para te ajudar. Diga-me, qual sua dúvida?"
-    },
-    {
-      "id": 2,
-      "message": "  O ingresso à UFG para a maioria dos cursos é feito por meio do Sistema de Seleção Unificada (SISU). Para concorrer ao SiSU, é preciso ter feito o Enem do ano anterior e depois se inscrever no SiSU pelo site"
-    },
-    {
-      "id": 3,
-      "message": "A Universidade Federal de Goiás (UFG) terá aulas presenciais a partir de janeiro de 2022. A confirmação partiu do reitor da instituição, Edward Madureira, em entrevista à Rádio Universitária da UFG nesta segunda-feira"
-    },
-    {
-      "id": 4,
-      "message": "Até mais, volte sempre que tiver alguma dúvida."
+      "type": 634673,
+      "score": 99,
+      "context": "Esse é um teste de contexto",
+      "document_id": "3820432sjdja",
+      "meta": {
+        "_split_id": 24,
+        "name": "Documento XYZ"
+      }
     }
   ]
 }

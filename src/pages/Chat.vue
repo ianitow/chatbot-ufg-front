@@ -31,17 +31,16 @@
         <span class="full-width text-center block date q-mb-md">{{ date }}</span>
         <div class="row container-messages q-pb-md wrap">
           <message-chat
-            v-for="(msg, index) in messages"
-            :key="index"
-            :message="msg.message"
-            :isTyping="msg.isTyping"
-            :sender="msg.isSender"
-            @onReportMessage="onReportMessage"
+            v-for="(message, index) in messages"
+            :key="`message-${index}`"
+            :isTyping="message.isTyping"
+            :message="message.message"
+            :sender="message.sender"
           />
         </div>
       </div>
     </div>
-    <send-message @onSendMessage="onMessage" @onInputFocus="__updateScroll" :disabled="isInputChatDisabled" />
+    <send-message @onSendMessage="onUserSendMessage" @onInputFocus="__updateScroll" :disabled="isInputChatDisabled" />
   </q-page>
 </template>
 
@@ -52,81 +51,88 @@ import MessageChat from '../components/MessageChat';
 import SendMessage from '../components/SendMessage';
 
 import moment from 'moment';
-import { sendQuestion, state } from '../use/useApi';
-import { setText, playText } from '../use/useVoice';
+import { sendQuestionToAPI } from '../use/useApi';
+import { useQuasar } from 'quasar';
+
 export default {
   name: 'Chat',
   components: { SendMessage, MessageChat },
 
   setup() {
-    const MIN_WAITING_TO_TYPING = 1000;
     const containerRef = ref(null);
     const isOnline = ref(true);
-    const router = useRouter();
     const prompt = ref(false);
-    let id = 1;
+    const $q = useQuasar();
     const messages = ref([]);
     const isInputChatDisabled = ref(false);
     moment.locale('pt-BR');
     const date = ref(moment().format('LLL'));
+
     function __updateScroll(ms = 5) {
       setTimeout(() => {
         containerRef.value.scrollTop = containerRef.value.scrollHeight;
       }, ms);
     }
-    function addMessage(message = '', isSender = true, isTyping = false) {
-      messages.value.push({ message, isSender, isTyping });
+    function createEffectTyping() {
+      return new Promise((resolve, reject) => {
+        messages.value.push({
+          message: null,
+          isTyping: true,
+          sender: false,
+        });
+        setTimeout(() => {
+          resolve();
+        }, 500);
+      });
+    }
+    async function onUserSendMessage(message) {
+      try {
+        messages.value.push({
+          message,
+          sender: true,
+        });
+        isInputChatDisabled.value = true;
+        await createEffectTyping();
+        const { data } = await sendQuestionToAPI(message);
+        const botMessage = data[0].context;
+        updateLastElement(botMessage);
+      } catch (err) {
+        isOnline.value = false;
+        updateLastElement('Desculpe, não estou conseguindo estabelecer uma conexão!');
+      } finally {
+        isInputChatDisabled.value = false;
+      }
+
       __updateScroll();
     }
-    function updateLastMessage(message) {
-      messages.value[messages.value.length - 1].isTyping = false;
-      messages.value[messages.value.length - 1].message = message;
-      setText(message);
-      playText();
+    function updateLastElement(message) {
+      const lastElementIndex = messages.value.length - 1;
+      const lastElement = messages.value[lastElementIndex];
+      lastElement.message = message;
+      lastElement.isTyping = false;
     }
-    function onMessage(text, isOnlyBot = false) {
-      if (!isOnlyBot) {
-        isInputChatDisabled.value = true;
-        addMessage(text);
-      }
-      setTimeout(() => {
-        addMessage(null, false, true);
-      }, MIN_WAITING_TO_TYPING);
 
-      sendQuestion(text, id)
-        .then(({ data }) => {
-          updateLastMessage(data.message);
+    function onBotSendMessage(message = null, isTyping = true) {
+      messages.value.push({
+        message,
+        sender: false,
+        isTyping,
+      });
+      __updateScroll();
+    }
 
-          id++;
-        })
-        .catch(({ message }) => {
-          isOnline.value = false;
-          updateLastMessage(message);
-        })
-        .finally(() => {
-          isInputChatDisabled.value = false;
-          updateScroll();
-        });
-    }
-    onMounted(() => {
-      if (!state.course || !state.name) {
-        router.push({ name: 'Home' });
-      }
-      onMessage(`Olá, me chamo ${state.name} e estou cursando ${state.course.value}.`);
-    });
-    function onReportMessage() {
-      prompt.value = !prompt.value;
-    }
+    onBotSendMessage('OI MEU NOME É TEGUINHA', false);
+
     return {
-      messages,
-      onMessage,
-      isInputChatDisabled,
-      containerRef,
       isOnline,
-      date,
       prompt,
-      onReportMessage,
-      updateScroll,
+      containerRef,
+      messages,
+      isInputChatDisabled,
+      date,
+      onUserSendMessage,
+      onBotSendMessage,
+      createEffectTyping,
     };
   },
 };
