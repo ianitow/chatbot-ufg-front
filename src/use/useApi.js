@@ -6,6 +6,12 @@ const state = reactive({
   name: '',
   course: '',
 });
+function setName(name = '') {
+  state.name = name;
+}
+function setCourse(course = '') {
+  state.course = course;
+}
 
 async function addNewRating(fullname, rating) {
   return new Promise((resolve, reject) => {
@@ -23,23 +29,32 @@ async function addNewRating(fullname, rating) {
   });
 }
 
-function setName(name = '') {
-  state.name = name;
-}
-function setCourse(course = '') {
-  state.course = course;
-}
-
-function sendQuestionToAPI(query) {
+function sendQuestionToAPI(answer) {
   return new Promise((resolve, reject) => {
     api
-      .get('/answers', {
+      .post('/send-message', {
         data: {
-          query,
+          answer,
         },
       })
-      .then((array) => {
-        resolve(array);
+      .then(({ data, status }) => {
+        resolve({ answers: data.answers, status });
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+function sendReportMessageToAPI(properties) {
+  return new Promise((resolve, reject) => {
+    api
+      .post('/report-messages', {
+        data: {
+          ...properties,
+        },
+      })
+      .then(({ data, status }) => {
+        resolve(data);
       })
       .catch((error) => {
         reject(error);
@@ -47,4 +62,4 @@ function sendQuestionToAPI(query) {
   });
 }
 
-export { state, setCourse, setName, addNewRating, sendQuestionToAPI };
+export { state, setCourse, setName, addNewRating, sendQuestionToAPI, sendReportMessageToAPI };

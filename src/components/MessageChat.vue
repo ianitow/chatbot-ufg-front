@@ -88,7 +88,7 @@
             </circle>
           </svg>
           <span v-else
-            >{{ message }}
+            >{{ context }}
 
             <q-icon
               class="q-ml-xs icon text-right"
@@ -103,43 +103,38 @@
           </span>
         </span>
       </div>
-      <div
-        v-if="!sender"
-        class="icon-report row items-center justify-center q-px-xs"
-      >
+      <div v-if="!sender" class="icon-report row items-center justify-center q-px-xs">
         <div class="row items-center justify-start desktop-only">
           <span class="block full-width cursor-pointer q-mb-md">👍</span>
-          <span @click="emitReport" class="block full-width cursor-pointer"
-            >👎</span
-          >
+          <span @click="emitReport" class="block full-width cursor-pointer">👎</span>
         </div>
       </div>
     </div>
-    <small class="fit" :class="{ 'text-right': sender, hidden: isTyping }">{{
-      hour
-    }}</small>
+    <small class="fit" :class="{ 'text-right': sender, hidden: isTyping }">{{ hour }}</small>
   </div>
 </template>
 <script>
-import { setText, playText } from "../use/useVoice";
-import moment from "moment";
+import { setText, playText } from '../use/useVoice';
+import moment from 'moment';
 
 export default {
   props: {
     sender: { type: Boolean },
     isTyping: { type: Boolean },
-    message: { type: String },
+    context: { type: String },
+    document_id: { type: String, required: false },
+    meta: { type: Object, required: false },
   },
-  emits: ["onReportMessage"],
+  emits: ['onReportMessage'],
   setup(props, { emit }) {
-    const hour = moment().format("LT");
+    const hour = moment().format('LT');
 
     function onClickPlayMessage() {
-      setText(props.message);
+      setText(props.context);
       playText();
     }
     function emitReport() {
-      emit("onReportMessage", props.message);
+      emit('onReportMessage', props);
     }
     return { onClickPlayMessage, hour, prompt, emitReport };
   },

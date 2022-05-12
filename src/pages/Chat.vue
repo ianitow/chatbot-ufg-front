@@ -18,12 +18,12 @@
           </q-card-section>
 
           <q-card-section class="q-pt-none">
-            <q-input dense v-model="address" autofocus @keyup.enter="prompt = false" />
+            <q-input dense v-model="reportMessage" autofocus @keyup.enter="sendReportMessage" />
           </q-card-section>
 
           <q-card-actions align="right" class="text-primary">
             <q-btn flat label="Cancel" v-close-popup />
-            <q-btn flat label="Enviar" v-close-popup />
+            <q-btn flat label="Enviar" v-close-popup @click="sendReportMessage" />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -34,13 +34,17 @@
             v-for="(message, index) in messages"
             :key="`message-${index}`"
             :isTyping="message.isTyping"
-            :message="message.message"
+            :context="message.context"
             :sender="message.sender"
+            :document_id="message.document_id"
+            :meta="message.meta"
+            :answerUser="message.answerUser"
+            @onReportMessage="handleReportMessage"
           />
         </div>
       </div>
     </div>
-    <send-message @onSendMessage="onUserSendMessage" @onInputFocus="__updateScroll" :disabled="isInputChatDisabled" />
+    <send-message @onSendMessage="onUserSendMessage" @onInputFocus="updateScroll" :disabled="isInputChatDisabled" />
   </q-page>
 </template>
 
@@ -51,7 +55,7 @@ import MessageChat from '../components/MessageChat';
 import SendMessage from '../components/SendMessage';
 
 import moment from 'moment';
-import { sendQuestionToAPI } from '../use/useApi';
+import { sendQuestionToAPI, sendReportMessageToAPI } from '../use/useApi';
 import { useQuasar } from 'quasar';
 
 export default {
@@ -64,11 +68,15 @@ export default {
     const prompt = ref(false);
     const $q = useQuasar();
     const messages = ref([]);
+    const reportMessage = ref(null);
+    const answersAPI = ref([]);
+    const answersLastIndex = ref(0);
     const isInputChatDisabled = ref(false);
+    const reportedMessage = ref({});
     moment.locale('pt-BR');
     const date = ref(moment().format('LLL'));
 
-    function __updateScroll(ms = 5) {
+    function updateScroll(ms = 5) {
       setTimeout(() => {
         containerRef.value.scrollTop = containerRef.value.scrollHeight;
       }, ms);
@@ -76,7 +84,7 @@ export default {
     function createEffectTyping() {
       return new Promise((resolve, reject) => {
         messages.value.push({
-          message: null,
+          context: null,
           isTyping: true,
           sender: false,
         });
@@ -85,17 +93,22 @@ export default {
         }, 500);
       });
     }
-    async function onUserSendMessage(message) {
+    async function onUserSendMessage(context) {
       try {
         messages.value.push({
-          message,
+          context,
           sender: true,
         });
+        answersLastIndex.value = 0;
         isInputChatDisabled.value = true;
+        console.log('bot');
         await createEffectTyping();
-        const { data } = await sendQuestionToAPI(message);
-        const botMessage = data[0].context;
-        updateLastElement(botMessage);
+        const { answers } = await sendQuestionToAPI(context);
+        answersAPI.value = answers.map((item) => {
+          item.value.answerUser = context;
+        });
+        const [firstMessage] = answersAPI.value;
+        updateLastElement(firstMessage);
       } catch (err) {
         isOnline.value = false;
         updateLastElement('Desculpe, não estou conseguindo estabelecer uma conexão!');
@@ -103,28 +116,51 @@ export default {
         isInputChatDisabled.value = false;
       }
 
-      __updateScroll();
+      updateScroll();
     }
-    function updateLastElement(message) {
+    function updateLastElement({ context, document_id, meta, answerUser }) {
       const lastElementIndex = messages.value.length - 1;
       const lastElement = messages.value[lastElementIndex];
-      lastElement.message = message;
+
+      lastElement.context = context;
       lastElement.isTyping = false;
+      lastElement.document_id = document_id;
+      lastElement.meta = meta;
+      lastElement.answerUser = answerUser;
     }
 
-    function onBotSendMessage(message = null, isTyping = true) {
+    function onBotSendMessage(context = null, isTyping = true) {
       messages.value.push({
-        message,
+        context,
         sender: false,
         isTyping,
+        document_id: null,
+        meta: {},
+        answerUser: null,
       });
-      __updateScroll();
+      updateScroll();
     }
 
     onBotSendMessage('OI MEU NOME É TEGUINHA', false);
-
+    function handleReportMessage({ document_id, context, meta }) {
+      if (!lastMessageUser) {
+        $q.notify({
+          message: 'Não é possivel reportar a mensagem inicial!',
+          color: 'negative',
+        });
+        return;
+      }
+      prompt.value = true;
+      reportedMessage.value = { document_id, context, meta, answer: lastMessageUser };
+    }
+    async function sendReportMessage() {
+      await sendReportMessageToAPI(reportedMessage.value);
+    }
     return {
       isOnline,
+      handleReportMessage,
+      reportedMessage,
+      sendReportMessage,
       prompt,
       containerRef,
       messages,
@@ -132,7 +168,9 @@ export default {
       date,
       onUserSendMessage,
       onBotSendMessage,
+      updateScroll,
       createEffectTyping,
+      reportMessage,
     };
   },
 };
