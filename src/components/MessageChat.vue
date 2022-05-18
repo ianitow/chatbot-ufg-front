@@ -124,6 +124,7 @@ export default {
     context: { type: String },
     document_id: { type: String, required: false },
     meta: { type: Object, required: false },
+    answerUser: { type: String, required: false },
   },
   emits: ['onReportMessage'],
   setup(props, { emit }) {

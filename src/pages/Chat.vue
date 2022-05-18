@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex container-master">
+  <q-page class="flex container-master" style="flex: 1 1 0%; border: 1px solid red">
     <header class="q-px-sm q-py-xs row self-start items-center non-selectable" st>
       <q-avatar class="avatar" :class="{ online: isOnline, busy: !isOnline }" size="80px" text-color="white">
         <img class="q-pa-sm" src="~assets/teguinha.svg"
@@ -9,53 +9,59 @@
         <span class="status">{{ isOnline ? 'Online' : 'Ocupada' }}</span>
       </div>
     </header>
-    <div class="container-chat flex container-master" style="overflow-y: scroll" ref="containerRef">
-      <q-dialog v-model="prompt" persistent>
-        <q-card style="min-width: 350px">
-          <q-card-section>
-            <div class="text-h6">O que há de errado?</div>
-            <small>Essa informação veio diferente da qual esperava?</small>
-          </q-card-section>
+    <div class="flex column" style="flex: 1 1 0%">
+      <div
+        class="container-chat flex container-master"
+        style="overflow-y: scroll; border: 1px solid blue; flex: 1 1 0%; height: 100%"
+        ref="containerRef"
+      >
+        <q-dialog v-model="prompt" persistent>
+          <q-card style="min-width: 350px">
+            <q-card-section>
+              <div class="text-h6">O que há de errado?</div>
+              <small>Essa informação veio diferente da qual esperava?</small>
+            </q-card-section>
 
-          <q-card-section class="q-pt-none">
-            <q-input dense v-model="reportMessage" autofocus @keyup.enter="sendReportMessage" />
-          </q-card-section>
+            <q-card-section class="q-pt-none">
+              <q-input dense v-model="reportMessage" autofocus @keyup.enter="sendReportMessage" />
+            </q-card-section>
 
-          <q-card-actions align="right" class="text-primary">
-            <q-btn flat label="Cancel" v-close-popup />
-            <q-btn flat label="Enviar" v-close-popup @click="sendReportMessage" />
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-      <div class="row">
-        <span class="full-width text-center block date q-mb-md">{{ date }}</span>
-        <div class="row container-messages q-pb-md wrap">
-          <message-chat
-            v-for="(message, index) in messages"
-            :key="`message-${index}`"
-            :isTyping="message.isTyping"
-            :context="message.context"
-            :sender="message.sender"
-            :document_id="message.document_id"
-            :meta="message.meta"
-            :answerUser="message.answerUser"
-            @onReportMessage="handleReportMessage"
-          />
+            <q-card-actions align="right" class="text-primary">
+              <q-btn flat label="Cancel" v-close-popup @click="cancelReportMessage" />
+              <q-btn flat label="Enviar" v-close-popup @click="sendReportMessage" />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+        <div class="row">
+          <span class="full-width text-center block date q-mb-md">{{ date }}</span>
+          <div class="row container-messages q-pb-md wrap">
+            <message-chat
+              v-for="(message, index) in messages"
+              :key="`message-${index}`"
+              :isTyping="message.isTyping"
+              :context="message.context"
+              :sender="message.sender"
+              :document_id="message.document_id"
+              :meta="message.meta"
+              :answerUser="message.answerUser"
+              @onReportMessage="handleReportMessage"
+            />
+          </div>
         </div>
       </div>
+      <send-message @onSendMessage="onUserSendMessage" @onInputFocus="updateScroll" :disabled="isInputChatDisabled" />
     </div>
-    <send-message @onSendMessage="onUserSendMessage" @onInputFocus="updateScroll" :disabled="isInputChatDisabled" />
   </q-page>
 </template>
 
 <script>
 import { useRouter } from 'vue-router';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeMount } from 'vue';
 import MessageChat from '../components/MessageChat';
 import SendMessage from '../components/SendMessage';
 
 import moment from 'moment';
-import { sendQuestionToAPI, sendReportMessageToAPI } from '../use/useApi';
+import { sendQuestionToAPI, sendReportMessageToAPI, state } from '../use/useApi';
 import { useQuasar } from 'quasar';
 
 export default {
@@ -88,8 +94,10 @@ export default {
           isTyping: true,
           sender: false,
         });
+        updateScroll();
         setTimeout(() => {
           resolve();
+          updateScroll();
         }, 500);
       });
     }
@@ -104,10 +112,14 @@ export default {
         console.log('bot');
         await createEffectTyping();
         const { answers } = await sendQuestionToAPI(context);
+
         answersAPI.value = answers.map((item) => {
-          item.value.answerUser = context;
+          item.answerUser = context;
+          return item;
         });
+
         const [firstMessage] = answersAPI.value;
+        answersLastIndex.value++;
         updateLastElement(firstMessage);
       } catch (err) {
         isOnline.value = false;
@@ -141,23 +153,53 @@ export default {
       updateScroll();
     }
 
-    onBotSendMessage('OI MEU NOME É TEGUINHA', false);
-    function handleReportMessage({ document_id, context, meta }) {
-      if (!lastMessageUser) {
+    onBeforeMount(async () => {
+      await createEffectTyping();
+      updateLastElement({ context: 'Olá, meu nome é Teguinha, em que posso ajuda-lo(a)?' });
+    });
+    function handleReportMessage({ document_id, context, meta, answerUser }) {
+      if (!answerUser || !answerUser.length) {
         $q.notify({
-          message: 'Não é possivel reportar a mensagem inicial!',
+          message: 'Não é possivel reportar a mensagem!',
           color: 'negative',
         });
         return;
       }
       prompt.value = true;
-      reportedMessage.value = { document_id, context, meta, answer: lastMessageUser };
+      reportedMessage.value = { document_id, context, meta, answerUser };
+    }
+    function cancelReportMessage() {
+      prompt.value = false;
+      reportedMEssage.value = null;
     }
     async function sendReportMessage() {
-      await sendReportMessageToAPI(reportedMessage.value);
+      reportMessage.value = '';
+      const user = { course_user: 'Ciencias da comp', name_user: 'Iaan Mesquita' };
+      const response = await sendReportMessageToAPI({ ...reportedMessage.value, ...user });
+      if (response) {
+        $q.notify({
+          message: 'Mensagem reportada com sucesso!',
+          color: 'positive',
+        });
+      }
+      if (answersLastIndex.value < answersAPI.value.length) {
+        await createEffectTyping();
+        updateLastElement({ context: 'Olha só o que eu encontrei também' });
+        await createEffectTyping();
+        const { context, document_id, meta, answerUser } = answersAPI.value[answersLastIndex.value];
+        updateLastElement({ context, document_id, meta, answerUser });
+        answersLastIndex.value++;
+      } else {
+        await createEffectTyping();
+        updateLastElement({
+          context:
+            'Poxa! Não consegui encontrar respostas precisas, mas não se preocupe, em breve serei capaz de responde-la',
+        });
+      }
     }
     return {
       isOnline,
+      cancelReportMessage,
       handleReportMessage,
       reportedMessage,
       sendReportMessage,
@@ -180,21 +222,13 @@ export default {
   flex-flow: column;
 }
 .container-chat {
+  flex: 1 1 0%;
   padding: 10px 10px 0px 10px;
   border: 1px solid #f0f0f0;
   border-top: none;
   scroll-behavior: smooth;
 }
-@media (min-width: $breakpoint-md-min) {
-  .container-chat {
-    max-height: 62.3vh;
-  }
-}
-@media (max-width: $breakpoint-sm-max) {
-  .container-chat {
-    max-height: 70.3vh;
-  }
-}
+
 .container-messages {
   overflow-y: auto;
   width: 100%;

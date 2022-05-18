@@ -29,12 +29,12 @@ async function addNewRating(fullname, rating) {
   });
 }
 
-function sendQuestionToAPI(answer) {
+function sendQuestionToAPI(context) {
   return new Promise((resolve, reject) => {
     api
       .post('/send-message', {
         data: {
-          answer,
+          answer: context,
         },
       })
       .then(({ data, status }) => {
@@ -49,9 +49,7 @@ function sendReportMessageToAPI(properties) {
   return new Promise((resolve, reject) => {
     api
       .post('/report-messages', {
-        data: {
-          ...properties,
-        },
+        ...properties,
       })
       .then(({ data, status }) => {
         resolve(data);
