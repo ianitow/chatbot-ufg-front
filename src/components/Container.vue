@@ -3,29 +3,21 @@
     <header-mobile v-if="isScreenMobile" />
     <header-desktop v-if="!isScreenMobile" />
 
-    <q-page-container
-      class="router-view col-xs-12 col-md-8 col-lg-9 col-sm-12"
-      style="min-height: 100% !important"
-    >
-      <transition
-        enter-active-class="animated fadeIn"
-        appear
-        leave-active-class="animated fadeOut"
-        :duration="300"
-      >
+    <q-page-container class="router-view col-xs-12 col-md-8 col-lg-9 col-sm-12" style="min-height: 100% !important">
+      <transition enter-active-class="animated fadeIn" appear leave-active-class="animated fadeOut" :duration="300">
         <router-view style="min-height: 100% !important" />
       </transition>
     </q-page-container>
   </div>
 </template>
 <script>
-import { defineComponent, ref, computed } from "vue";
-import HeaderDesktop from "./HeaderDesktop.vue";
-import HeaderMobile from "./HeaderMobile.vue";
-import { useQuasar } from "quasar";
+import { defineComponent, ref, computed } from 'vue';
+import HeaderDesktop from './HeaderDesktop.vue';
+import HeaderMobile from './HeaderMobile.vue';
+import { useQuasar } from 'quasar';
 
 export default defineComponent({
-  name: "Container",
+  name: 'Container',
   components: { HeaderDesktop, HeaderMobile },
   setup() {
     const $q = useQuasar();

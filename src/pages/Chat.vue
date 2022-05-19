@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex container-master" style="flex: 1 1 0%; border: 1px solid red">
+  <q-page class="flex container-master" style="flex: 1 1 0%">
     <header class="q-px-sm q-py-xs row self-start items-center non-selectable" st>
       <q-avatar class="avatar" :class="{ online: isOnline, busy: !isOnline }" size="80px" text-color="white">
         <img class="q-pa-sm" src="~assets/teguinha.svg"
@@ -10,11 +10,7 @@
       </div>
     </header>
     <div class="flex column" style="flex: 1 1 0%">
-      <div
-        class="container-chat flex container-master"
-        style="overflow-y: scroll; border: 1px solid blue; flex: 1 1 0%; height: 100%"
-        ref="containerRef"
-      >
+      <div class="container-chat flex container-master" style="overflow-y: scroll" ref="containerRef">
         <q-dialog v-model="prompt" persistent>
           <q-card style="min-width: 350px">
             <q-card-section>
@@ -32,9 +28,9 @@
             </q-card-actions>
           </q-card>
         </q-dialog>
-        <div class="row">
-          <span class="full-width text-center block date q-mb-md">{{ date }}</span>
-          <div class="row container-messages q-pb-md wrap">
+        <div class="flex column" style="display: flex; flex-grow: 1; max-height: 100%">
+          <span class="text-center block date q-mb-md">{{ date }}</span>
+          <div class="flex column container-messages q-pb-md wrap" style="height: 100%">
             <message-chat
               v-for="(message, index) in messages"
               :key="`message-${index}`"
@@ -49,7 +45,9 @@
           </div>
         </div>
       </div>
-      <send-message @onSendMessage="onUserSendMessage" @onInputFocus="updateScroll" :disabled="isInputChatDisabled" />
+      <div class="flex column" style="margin-top: auto; margin-bottom: auto">
+        <send-message @onSendMessage="onUserSendMessage" @onInputFocus="updateScroll" :disabled="isInputChatDisabled" />
+      </div>
     </div>
   </q-page>
 </template>
@@ -82,6 +80,10 @@ export default {
     moment.locale('pt-BR');
     const date = ref(moment().format('LLL'));
 
+    function sleep(time) {
+      return new Promise((resolve) => setTimeout(resolve, time));
+    }
+
     function updateScroll(ms = 5) {
       setTimeout(() => {
         containerRef.value.scrollTop = containerRef.value.scrollHeight;
@@ -95,10 +97,10 @@ export default {
           sender: false,
         });
         updateScroll();
-        setTimeout(() => {
+        sleep(500).then(() => {
           resolve();
           updateScroll();
-        }, 500);
+        });
       });
     }
     async function onUserSendMessage(context) {
@@ -107,9 +109,10 @@ export default {
           context,
           sender: true,
         });
+        updateScroll();
         answersLastIndex.value = 0;
         isInputChatDisabled.value = true;
-        console.log('bot');
+        await sleep(500);
         await createEffectTyping();
         const { answers } = await sendQuestionToAPI(context);
 
@@ -154,7 +157,9 @@ export default {
     }
 
     onBeforeMount(async () => {
+      await sleep(500);
       await createEffectTyping();
+      await sleep(500);
       updateLastElement({ context: 'Olá, meu nome é Teguinha, em que posso ajuda-lo(a)?' });
     });
     function handleReportMessage({ document_id, context, meta, answerUser }) {
@@ -170,7 +175,7 @@ export default {
     }
     function cancelReportMessage() {
       prompt.value = false;
-      reportedMEssage.value = null;
+      reportedMessage.value = null;
     }
     async function sendReportMessage() {
       reportMessage.value = '';
@@ -222,7 +227,6 @@ export default {
   flex-flow: column;
 }
 .container-chat {
-  flex: 1 1 0%;
   padding: 10px 10px 0px 10px;
   border: 1px solid #f0f0f0;
   border-top: none;
@@ -283,6 +287,15 @@ header {
   background-color: rgb(231, 79, 9);
 }
 
+.container-chat {
+  max-height: 63.3vh;
+}
+
+@media (max-width: $breakpoint-sm-max) {
+  .container-chat {
+    max-height: 69.7vh;
+  }
+}
 .container-master {
   padding: 10px;
 }

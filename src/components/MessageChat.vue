@@ -103,10 +103,19 @@
           </span>
         </span>
       </div>
-      <div v-if="!sender" class="icon-report row items-center justify-center q-px-xs">
-        <div class="row items-center justify-start desktop-only">
-          <span class="block full-width cursor-pointer q-mb-md">👍</span>
-          <span @click="emitReport" class="block full-width cursor-pointer">👎</span>
+      <div
+        v-if="!sender"
+        class="icon-report row items-center justify-center q-px-xs"
+        :class="{ voted: isShowingButton }"
+      >
+        <div class="flex column items-center justify-start desktop-only" style="gap: 0.5rem">
+          <span class="block full-width cursor-pointer" @click="hideDownButton">👍</span>
+
+          <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
+            <span v-if="isShowingButton" @click="emitReport" class="block full-width cursor-pointer"
+              >👎</span
+            ></transition
+          >
         </div>
       </div>
     </div>
@@ -116,6 +125,7 @@
 <script>
 import { setText, playText } from '../use/useVoice';
 import moment from 'moment';
+import { ref } from 'vue';
 
 export default {
   props: {
@@ -129,6 +139,7 @@ export default {
   emits: ['onReportMessage'],
   setup(props, { emit }) {
     const hour = moment().format('LT');
+    const isShowingButton = ref(true);
 
     function onClickPlayMessage() {
       setText(props.context);
@@ -137,7 +148,10 @@ export default {
     function emitReport() {
       emit('onReportMessage', props);
     }
-    return { onClickPlayMessage, hour, prompt, emitReport };
+    function hideDownButton() {
+      isShowingButton.value = false;
+    }
+    return { onClickPlayMessage, hour, prompt, emitReport, isShowingButton, hideDownButton };
   },
 };
 </script>
@@ -168,6 +182,10 @@ export default {
   border-radius: 13.8346px 13.8346px 0px 13.8346px;
   color: #414141;
   font-weight: lighter;
+}
+.voted {
+  display: flex;
+  opacity: 1;
 }
 .chat-container:hover .icon-report {
   display: flex;
