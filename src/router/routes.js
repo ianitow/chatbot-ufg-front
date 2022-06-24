@@ -3,20 +3,20 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      // { name: "Home", path: "", component: () => import("pages/Index.vue") },
-      // {
-      //   path: '',
-      //   name: 'PersonalInfo',
-      //   component: () => import('pages/PersonalInfo.vue'),
-      // },
-      // {
-      //   path: '/terms',
-      //   name: 'TermPrivacy',
-      //   component: () => import('pages/TermPrivacy.vue'),
-      // },
+      { name: 'Home', path: '', component: () => import('pages/Index.vue') },
+      {
+        path: '',
+        name: 'PersonalInfo',
+        component: () => import('pages/PersonalInfo.vue'),
+      },
+      {
+        path: '/terms',
+        name: 'TermPrivacy',
+        component: () => import('pages/TermPrivacy.vue'),
+      },
 
       {
-        path: '/',
+        path: '/chat',
         name: 'Chat',
         component: () => import('pages/Chat.vue'),
       },

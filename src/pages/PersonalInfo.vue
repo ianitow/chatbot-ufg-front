@@ -3,26 +3,11 @@
     <form class="fit q-mb-sm" @submit.prevent="onSubmit">
       <div class="row justify-center">
         <div class="row justify-center">
-          <q-img
-            class="row"
-            src="~assets/avatar.svg"
-            width="150px"
-            height="150px"
-          />
-          <span class="text-center full-width q-mt-lg"
-            >Preencha algumas informações</span
-          >
+          <q-img class="row" src="~assets/avatar.svg" width="150px" height="150px" />
+          <span class="text-center full-width q-mt-lg">Preencha algumas informações</span>
           <div class="row" style="max-width: 300px">
-            <input-component
-              @update:model-value="onInputChange"
-              name="Seu nome"
-              class="q-mt-lg"
-            />
-            <select-component
-              @update:model-value="onSelectedChange"
-              name="Curso"
-              class="q-mt-md"
-            />
+            <input-component name="Seu nome" class="q-mt-lg" />
+            <select-component name="Curso" class="q-mt-md" />
           </div>
         </div>
       </div>
@@ -35,7 +20,7 @@
         icon-right="arrow_forward_ios"
         label="Acessar"
         type="submit"
-        :disabled="isButtonDisabled"
+        :disabled="!isButtonEnabled"
         @click="onSubmit"
       />
     </div>
@@ -43,40 +28,25 @@
 </template>
 
 <script>
-import InputComponent from "src/components/InputComponent.vue";
-import SelectComponent from "src/components/SelectComponent.vue";
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { setName, setCourse } from "../use/useApi";
+import InputComponent from 'src/components/InputComponent.vue';
+import SelectComponent from 'src/components/SelectComponent.vue';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { state } from '../use/useApi';
 export default {
   components: { InputComponent, SelectComponent },
   setup() {
     const router = useRouter();
-    const userInput = ref(null);
-    const selectedInput = ref(null);
-    function onInputChange(nameStudent) {
-      userInput.value = nameStudent;
-    }
-    function onSelectedChange(nameCourse) {
-      selectedInput.value = nameCourse;
-    }
-
-    const isButtonDisabled = computed(() =>
-      !userInput.value ||
-      userInput.value.length < 4 ||
-      userInput.value == "" ||
-      selectedInput.value == "" ||
-      !selectedInput.value
-        ? true
-        : false
-    );
+    const isButtonEnabled = computed(() => {
+      const { name, course } = state;
+      if (!name || name.length < 4) return false;
+      if (!course) return false;
+      return true;
+    });
     function onSubmit() {
-      console.log("Clicado");
-      setName(userInput.value);
-      setCourse(selectedInput.value);
-      router.push({ name: "Chat" });
+      router.push({ name: 'Chat' });
     }
-    return { onInputChange, onSelectedChange, isButtonDisabled, onSubmit };
+    return { onSubmit, isButtonEnabled };
   },
 };
 </script>

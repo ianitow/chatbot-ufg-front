@@ -9,19 +9,20 @@
       autofocus
       v-model="nameStudent"
       required
-      @update:model-value="this.$emit('update:model-value', nameStudent)"
+      @update:model-value="setName(nameStudent)"
     />
   </div>
 </template>
 
 <script>
+import { ref } from 'vue';
+import { setName } from '../use/useApi';
 export default {
   props: { name: { type: String, required: true } },
-  emits: ["update:model-value"],
-  data() {
-    return { nameStudent: "" };
+  setup() {
+    const nameStudent = ref(null);
+    return { nameStudent, setName };
   },
-  setup() {},
 };
 </script>
 <style lang="scss" scoped>

@@ -1,12 +1,6 @@
 <template>
-  <form
-    @submit.prevent="onSendMessage"
-    class="message-send q-mt-sm row items-center"
-  >
-    <div
-      v-if="options.isCapturingVoice"
-      class="col row justify-center items-center"
-    >
+  <form @submit.prevent="onSendMessage" class="message-send q-mt-sm row items-center">
+    <div v-if="options.isCapturingVoice" class="col row justify-center items-center">
       <q-spinner-audio class="full-width" size="1rem" />
       <small class="self-end">Capturando voz...</small>
     </div>
@@ -22,11 +16,7 @@
       @focus="onFocusable"
     />
 
-    <div
-      class="message-icon q-mx-sm flex items-center justify-center"
-      :class="{ disabled }"
-      @click="onSendMessage"
-    >
+    <div class="message-icon q-mx-sm flex items-center justify-center" :class="{ disabled }" @click="onSendMessage">
       <q-icon size="20px" name="send" />
     </div>
     <div
@@ -40,23 +30,20 @@
   </form>
 </template>
 <script>
-import { ref, watch, nextTick, onMounted } from "vue";
-import { captureVoice, stopVoice, options, setText } from "../use/useVoice";
-import { useQuasar } from "quasar";
+import { ref, watch, nextTick, onMounted } from 'vue';
+import { captureVoice, stopVoice, options } from '../use/useVoice';
+import { useQuasar } from 'quasar';
 export default {
-  name: "SendMessage",
-  emits: ["onSendMessage", "onInputFocus"],
+  name: 'SendMessage',
+  emits: ['onSendMessage', 'onInputFocus'],
   props: {
     disabled: Boolean,
   },
 
   setup(props, { emit }) {
-    const message = ref("");
+    const message = ref('');
     const inputElement = ref(null);
     const $q = useQuasar();
-    onMounted(() => {
-      console.log("props", props);
-    });
     watch(
       () => props.disabled,
       (newValue) => {
@@ -65,12 +52,12 @@ export default {
             inputElement.value.focus();
           });
         }
-      }
+      },
     );
     function onSendMessage() {
       if (!props.disabled && message.value.length != 0) {
-        emit("onSendMessage", message.value);
-        message.value = "";
+        emit('onSendMessage', message.value);
+        message.value = '';
       }
     }
     function onVoiceCaptured() {
@@ -80,7 +67,7 @@ export default {
       });
     }
     function onFocusable() {
-      emit("onInputFocus", 500);
+      emit('onInputFocus', 500);
     }
     return {
       message,

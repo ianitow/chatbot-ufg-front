@@ -4,8 +4,7 @@
       <q-img src="~assets/bug_fixing.svg" style="width: 100%" />
       <h2 class="q-mb-none">Algum problema?</h2>
 
-      <small class="block full-width">Descreva um pouco sobre os problemas que enfrentou.</small
-      >
+      <small class="block full-width">Descreva um pouco sobre os problemas que enfrentou.</small>
       <q-input
         v-model="ratingModel"
         class="full-width q-mb-md"
@@ -30,37 +29,27 @@
   </q-page>
 </template>
 <script>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { sendReport } from "../use/useApi";
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
-//Min caracteres 10
-//Mensagem de erro se náo tiver mensagem
-//Bloquear botão de enviar após enviar alguma mensagem (SessionStorage)
-//http://locahost:3000/report
-/**
- * {
- *  message:''
- * }
- */
 export default {
   components: {},
   setup() {
     const router = useRouter();
     const userInput = ref(null);
     const selectedInput = ref(null);
-   
+
     const isButtonDisabled = computed(() =>
       !userInput.value ||
       userInput.value.length < 4 ||
-      userInput.value == "" ||
-      selectedInput.value == "" ||
+      userInput.value == '' ||
+      selectedInput.value == '' ||
       !selectedInput.value
         ? true
-        : false
+        : false,
     );
     function onSubmit() {}
-    return { onInputChange, onSelectedChange, isButtonDisabled, onSubmit };
+    return { isButtonDisabled, onSubmit };
   },
 };
 </script>

@@ -53,8 +53,8 @@
 </template>
 
 <script>
-import { useRouter } from 'vue-router';
-import { ref, onMounted, onBeforeMount } from 'vue';
+import { ref, onBeforeMount } from 'vue';
+import { sleep, updateScroll } from '../utils';
 import MessageChat from '../components/MessageChat';
 import SendMessage from '../components/SendMessage';
 
@@ -80,15 +80,6 @@ export default {
     moment.locale('pt-BR');
     const date = ref(moment().format('LLL'));
 
-    function sleep(time) {
-      return new Promise((resolve) => setTimeout(resolve, time));
-    }
-
-    function updateScroll(ms = 5) {
-      setTimeout(() => {
-        containerRef.value.scrollTop = containerRef.value.scrollHeight;
-      }, ms);
-    }
     function createEffectTyping() {
       return new Promise((resolve, reject) => {
         messages.value.push({
@@ -96,10 +87,10 @@ export default {
           isTyping: true,
           sender: false,
         });
-        updateScroll();
+        updateScroll(containerRef);
         sleep(500).then(() => {
           resolve();
-          updateScroll();
+          updateScroll(containerRef);
         });
       });
     }
@@ -109,7 +100,7 @@ export default {
           context,
           sender: true,
         });
-        updateScroll();
+        updateScroll(containerRef);
         answersLastIndex.value = 0;
         isInputChatDisabled.value = true;
         await sleep(500);
@@ -120,7 +111,6 @@ export default {
           item.answerUser = context;
           return item;
         });
-
         const [firstMessage] = answersAPI.value;
         answersLastIndex.value++;
         updateLastElement(firstMessage);
@@ -130,8 +120,7 @@ export default {
       } finally {
         isInputChatDisabled.value = false;
       }
-
-      updateScroll();
+      updateScroll(containerRef);
     }
     function updateLastElement({ context, document_id, meta, answerUser }) {
       const lastElementIndex = messages.value.length - 1;
@@ -153,7 +142,7 @@ export default {
         meta: {},
         answerUser: null,
       });
-      updateScroll();
+      updateScroll(containerRef);
     }
 
     onBeforeMount(async () => {
@@ -256,7 +245,6 @@ span.name {
 header {
   border: 1px solid rgba(216, 216, 216, 0.34);
   width: 100%;
-
   border-radius: 10px;
   border-top-left-radius: 0px;
   border-bottom-left-radius: 0px;

@@ -9,8 +9,9 @@ const state = reactive({
 function setName(name = '') {
   state.name = name;
 }
-function setCourse(course = '') {
-  state.course = course;
+
+function setCourse(valor = '') {
+  state.course = valor;
 }
 
 async function addNewRating(fullname, rating) {
